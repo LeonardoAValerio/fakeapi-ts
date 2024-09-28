@@ -1,8 +1,8 @@
 import { json } from "express";
 import express from 'express';
-import fs from 'fs';
-import {Livro} from "./models/Books";
 import { getBooks } from './controllers/Books';
+import { BookService } from "./services/Books";
+import { Livro } from "./models/Books";
 const app = express();
 
 interface BookProps {
@@ -17,10 +17,10 @@ app.get("/books", (req, res) => {
 });
 
 app.post("/books", (req, res) => {
-    const books = getBooks();
-    const book = new Livro(req.body);
-    fs.writeFileSync("src/json/books.json", JSON.stringify({books}));
-    res.send({"message": "Suceful!"});
+    const livro  = new Livro(req.body)
+    const bookService = new BookService(livro);
+    const msg = bookService.execute();
+    res.send(msg);  
 });
 
 app.listen(8080, () => {
