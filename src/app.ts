@@ -1,26 +1,33 @@
 import { json } from "express";
-import express from 'express';
-import { getBooks } from './controllers/Books';
+import express, { Request, Response } from 'express';
+import { getBookForId, getBooks, editBookForId } from './controllers/Books';
 import { BookService } from "./services/Books";
-import { Livro } from "./models/Books";
+import { Book } from "./models/Book";
 const app = express();
-
-interface BookProps {
-    title: string
-}
 
 app.use(json());
 
-app.get("/books", (req, res) => {
+app.get("/books", (req: Request, res: Response) => {
     const books = getBooks();
     res.send(books)
 });
 
-app.post("/books", (req, res) => {
-    const livro  = new Livro(req.body)
-    const bookService = new BookService(livro);
+app.get("/books/:id", (req: Request, res: Response) => {
+    const searchId = req.params.id as string;
+    const book = getBookForId(searchId);
+    res.send(book)
+});
+
+app.post("/books", (req: Request, res: Response) => {
+    const book  = new Book(req.body)
+    const bookService = new BookService(book);
     const msg = bookService.execute();
-    res.send(msg);  
+    res.status(msg.statusCode).send(msg);  
+});
+
+app.patch("/books/:id", (req: Request, res: Response) => {
+    const editId = req.params.id as string;
+    editBookForId(editId, req.body);
 });
 
 app.listen(8080, () => {
